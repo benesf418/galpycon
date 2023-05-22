@@ -1,24 +1,23 @@
 import pygame
+from pygame import Vector2
 from constants import *
 
 class Planet:
     screen: pygame.Surface
-    x: int
-    y: int
+    position: Vector2
     radius: int
     surface: pygame.Surface
     color: pygame.Color
     ships: int
 
-    def __init__(self, screen: pygame.Surface, x: int, y: int , radius: str, color: pygame.Color):
+    def __init__(self, screen: pygame.Surface, x: int, y: int , radius: str, color: pygame.Color, startingShips = 0):
         self.screen = screen
-        self.x = x
-        self.y = y
+        self.position = Vector2(x, y)
         self.color = color
         self.radius = radius
         self.surface = pygame.Surface((radius*2, radius*2))
         self.frameCounter = 0
-        self.ships = 10
+        self.ships = startingShips
         self.generate_surface()
 
     def generate_surface(self):
@@ -34,9 +33,13 @@ class Planet:
         self.frameCounter += self.radius
         if self.frameCounter >= 2500:
             self.frameCounter -= 2500
-            self.ships += 1
+            self.ships += 20
             self.generate_surface()
 
     
     def draw(self):
-        self.screen.blit(self.surface, (self.x - self.radius/2, self.y - self.radius/2))
+        self.screen.blit(self.surface, (self.position.x - self.radius, self.position.y - self.radius))
+    
+    def isInRadius(self, pos: Vector2) -> bool:
+        distance = (pos - self.position).length()
+        return distance <= self.radius

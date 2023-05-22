@@ -1,11 +1,13 @@
 import pygame
+import math
 from sys import exit
+from pygame import Vector2
 
 pygame.init()
 
-#define constants
 from constants import *
 from Planet import Planet
+from ship import Ship
 
 #init window
 screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -16,11 +18,46 @@ clock = pygame.time.Clock()
 background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
 background.fill(BACKGROUND_COLOR)
 
+playerColor = COLOR_BLUE
+
 planets = [
-    Planet(screen, 300, 300, 30, COLOR_BLUE),
+    Planet(screen, 300, 300, 30, playerColor),
     Planet(screen, 200, 100, 50, COLOR_RED),
-    Planet(screen, 500, 250, 40, COLOR_WHITE)
+    Planet(screen, 500, 250, 40, COLOR_NEUTRAL),
+    Planet(screen, 400, 500, 50, COLOR_NEUTRAL)
 ]
+
+ships = []
+
+targetPlanetSource: Planet = None
+
+def sendShips(source: Planet, target: Planet):
+    shipCount = math.floor(source.ships/2)
+    source.ships -= shipCount
+    source.generate_surface()
+    planetPos = source.position
+    targetPlanet = target
+    direction:Vector2 = (targetPlanet.position - planetPos).normalize()
+    distance = source.radius
+    degreeStep = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
+    direction = direction.rotate(-degreeStep*shipCount/2)
+    degreeCounter = 0
+    for i in range(0, shipCount):
+        pos = planetPos + direction * distance
+        direction = direction.rotate(degreeStep)
+        degreeCounter += degreeStep
+        if degreeCounter >= 360:
+            degreeCounter = 0
+            distance += SHIP_SIZE
+            degreeStep = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
+        ships.append(Ship(screen, pos, source.color, target))
+
+def drawPlanetSelection(source: Planet, target: Planet, color = playerColor):
+    direction: Vector2 = (planet.position - targetPlanetSource.position).normalize()
+    lineStart = targetPlanetSource.position + direction * targetPlanetSource.radius
+    lineEnd = planet.position - direction * (planet.radius + 6)
+    pygame.draw.polygon(screen, color,(lineStart, lineEnd), 4)
+    pygame.draw.circle(screen, color, target.position, target.radius + 6, 4)
 
 while True:
     for event in pygame.event.get():
@@ -28,12 +65,42 @@ while True:
             pygame.quit()
             exit()
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            for planet in planets:
+                if planet.isInRadius(pos) and planet.color == playerColor:
+                    targetPlanetSource = planet
+        
+        if event.type == pygame.MOUSEBUTTONUP:
+            if targetPlanetSource is not None:
+                pos = pygame.mouse.get_pos()
+                planetChosen: bool = False
+                for planet in planets:
+                    if planet.isInRadius(pos) and targetPlanetSource is not planet:
+                        sendShips(targetPlanetSource, planet)
+            targetPlanetSource = None        
+
     for planet in planets:
         planet.update()
+    for ship in ships:
+        ship.update()
+        if ship.arrived:
+            ships.remove(ship)
 
     screen.blit(background, (0,0))
+
     for planet in planets:
         planet.draw()
+    for ship in ships:
+        ship.draw()
+
+    if targetPlanetSource is not None:
+        mousePos = pygame.mouse.get_pos()
+        for planet in planets:
+            if planet is targetPlanetSource:
+                continue
+            if planet.isInRadius(mousePos):
+                drawPlanetSelection(targetPlanetSource, planet)
 
     pygame.display.update()
     clock.tick(60)
