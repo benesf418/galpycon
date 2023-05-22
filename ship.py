@@ -28,7 +28,7 @@ class Ship:
 
     def update(self):
         self.moveDirection = (self.targetPlanet.position - self.position).normalize()
-        self.position += self.moveDirection * SHIP_SPEED
+        self.position += self.moveDirection * SHIP_SPEED * GAME_SPEED
         if self.targetPlanet.isInRadius(self.position):
             self.arrived = True
             if self.targetPlanet.color != self.color:

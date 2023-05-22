@@ -30,10 +30,10 @@ class Planet:
     def update(self):
         if self.color == COLOR_NEUTRAL:
             return
-        self.frameCounter += self.radius
+        self.frameCounter += self.radius * PLANET_PRODUCTION_SPEED * GAME_SPEED
         if self.frameCounter >= 2500:
             self.frameCounter -= 2500
-            self.ships += 20
+            self.ships += 1
             self.generate_surface()
 
     

@@ -1,13 +1,22 @@
 import pygame
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-BACKGROUND_COLOR = 'black'
+SCREEN_WIDTH: int = 800
+SCREEN_HEIGHT: int = 600
+
+GAME_SPEED: float = 5
+
 SHIP_COUNTER_FONT = pygame.font.SysFont('consolas', 25)
+
+COLOR_BLACK = pygame.Color(0, 0, 0, 255)
 COLOR_RED = pygame.Color(255, 0, 0, 255)
 COLOR_BLUE = pygame.Color(0, 0, 255, 255)
 COLOR_WHITE = pygame.Color(255, 255, 255, 255)
-COLOR_SHIP_COUNTER = COLOR_WHITE
-COLOR_NEUTRAL = COLOR_WHITE
+
+BACKGROUND_COLOR: pygame.Color = COLOR_BLACK
+COLOR_SHIP_COUNTER: pygame.Color = COLOR_WHITE
+COLOR_NEUTRAL: pygame.Color = COLOR_WHITE
+
+PLANET_PRODUCTION_SPEED: float = 1
+
 SHIP_SPEED: float = 0.5
-SHIP_SIZE = 14
+SHIP_SIZE: int = 14
