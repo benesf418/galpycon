@@ -1,4 +1,5 @@
 import pygame
+pygame.init()
 
 SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
@@ -19,3 +20,5 @@ COLOR_SHIP_COUNTER: pygame.Color = COLOR_WHITE
 COLOR_NEUTRAL: pygame.Color = COLOR_WHITE
 
 SHIP_SIZE: int = 14
+
+NETWORK_HOST = 'localhost'
