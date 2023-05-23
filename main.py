@@ -24,7 +24,8 @@ planets = [
     Planet(screen, 300, 300, 30, playerColor),
     Planet(screen, 200, 100, 50, COLOR_RED),
     Planet(screen, 500, 250, 40, COLOR_NEUTRAL),
-    Planet(screen, 400, 500, 50, COLOR_NEUTRAL)
+    Planet(screen, 400, 500, 50, COLOR_NEUTRAL),
+    Planet(screen, 650, 200, 50, COLOR_NEUTRAL)
 ]
 
 ships = []
@@ -32,7 +33,9 @@ ships = []
 targetPlanetSource: Planet = None
 
 def sendShips(source: Planet, target: Planet):
-    shipCount = math.floor(source.ships/2)
+    shipCount = round(source.ships/2)
+    if shipCount > source.ships:
+        shipCount -= 1
     source.ships -= shipCount
     source.generate_surface()
     planetPos = source.position
@@ -50,7 +53,7 @@ def sendShips(source: Planet, target: Planet):
             degreeCounter = 0
             distance += SHIP_SIZE
             degreeStep = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
-        ships.append(Ship(screen, pos, source.color, target))
+        ships.append(Ship(screen, pos, source.color, target, planets))
 
 def drawPlanetSelection(source: Planet, target: Planet, color = playerColor):
     direction: Vector2 = (planet.position - targetPlanetSource.position).normalize()

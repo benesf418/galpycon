@@ -12,7 +12,7 @@ class Ship:
     moveDirection: Vector2
     arrived: bool
 
-    def __init__(self, screen: pygame.Surface, position: Vector2, color: pygame.Color, targetPlanet: Planet):
+    def __init__(self, screen: pygame.Surface, position: Vector2, color: pygame.Color, targetPlanet: Planet, planets):
         self.screen = screen
         self.position = position
         self.color = color
@@ -23,24 +23,42 @@ class Ship:
         self.targetPlanet = targetPlanet
         self.arrived = False
         self.moveDirection = Vector2(0, 1)
+        self.planets = planets
         
         
 
     def update(self):
         self.moveDirection = (self.targetPlanet.position - self.position).normalize()
-        self.position += self.moveDirection * SHIP_SPEED * GAME_SPEED
-        if self.targetPlanet.isInRadius(self.position):
-            self.arrived = True
-            if self.targetPlanet.color != self.color:
-                self.targetPlanet.ships -= 1
-                if self.targetPlanet.ships == 0:
-                    self.targetPlanet.color = self.color
-                elif self.targetPlanet.ships == -1:
-                    self.targetPlanet.color = self.color
-                    self.targetPlanet.ships = 1
-            else:
-                self.targetPlanet.ships += 1
-            self.targetPlanet.generate_surface()
+        newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
+        for planet in self.planets:
+            if planet.isInRadius(newPosition):
+                if planet == self.targetPlanet:
+                    self.arrived = True
+                    if self.targetPlanet.color != self.color:
+                        self.targetPlanet.ships -= 1
+                        if self.targetPlanet.ships == 0:
+                            self.targetPlanet.color = self.color
+                        elif self.targetPlanet.ships == -1:
+                            self.targetPlanet.color = self.color
+                            self.targetPlanet.ships = 1
+                    else:
+                        self.targetPlanet.ships += 1
+                    self.targetPlanet.generate_surface()
+                else:
+                    angleToObstacle = self.moveDirection.angle_to(planet.position - self.position)
+                    if (angleToObstacle > 180):
+                        angleToObstacle -= 360
+                    elif angleToObstacle < - 180:
+                        angleToObstacle += 360
+                    if abs(angleToObstacle) < 89:
+                        angleToRotate = 90 - abs(angleToObstacle)
+                        if angleToObstacle <= 0:
+                            self.moveDirection = self.moveDirection.rotate(angleToRotate)
+                        else:
+                            self.moveDirection = self.moveDirection.rotate(-angleToRotate)
+                        newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
+        self.position = newPosition
+            
 
     
     def draw(self):
