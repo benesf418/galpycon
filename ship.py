@@ -31,8 +31,8 @@ class Ship:
         self.moveDirection = (self.targetPlanet.position - self.position).normalize()
         newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
         for planet in self.planets:
-            if planet.isInRadius(newPosition):
-                if planet == self.targetPlanet:
+            if planet == self.targetPlanet:
+                if planet.isInRadius(newPosition):
                     self.arrived = True
                     if self.targetPlanet.color != self.color:
                         self.targetPlanet.ships -= 1
@@ -44,19 +44,19 @@ class Ship:
                     else:
                         self.targetPlanet.ships += 1
                     self.targetPlanet.generate_surface()
-                else:
-                    angleToObstacle = self.moveDirection.angle_to(planet.position - self.position)
-                    if (angleToObstacle > 180):
-                        angleToObstacle -= 360
-                    elif angleToObstacle < - 180:
-                        angleToObstacle += 360
-                    if abs(angleToObstacle) < 89:
-                        angleToRotate = 90 - abs(angleToObstacle)
-                        if angleToObstacle <= 0:
-                            self.moveDirection = self.moveDirection.rotate(angleToRotate)
-                        else:
-                            self.moveDirection = self.moveDirection.rotate(-angleToRotate)
-                        newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
+            elif planet.isInRadius(newPosition, 9):
+                angleToObstacle = self.moveDirection.angle_to(planet.position - self.position)
+                if (angleToObstacle > 180):
+                    angleToObstacle -= 360
+                elif angleToObstacle < - 180:
+                    angleToObstacle += 360
+                if abs(angleToObstacle) < 89:
+                    angleToRotate = 90 - abs(angleToObstacle)
+                    if angleToObstacle <= 0:
+                        self.moveDirection = self.moveDirection.rotate(angleToRotate)
+                    else:
+                        self.moveDirection = self.moveDirection.rotate(-angleToRotate)
+                    newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
         self.position = newPosition
             
 

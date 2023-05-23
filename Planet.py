@@ -40,6 +40,6 @@ class Planet:
     def draw(self):
         self.screen.blit(self.surface, (self.position.x - self.radius, self.position.y - self.radius))
     
-    def isInRadius(self, pos: Vector2) -> bool:
+    def isInRadius(self, pos: Vector2, extendRadius: float = 0) -> bool:
         distance = (pos - self.position).length()
-        return distance <= self.radius
+        return distance <= self.radius + extendRadius
