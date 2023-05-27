@@ -20,7 +20,7 @@ class Planet:
         surface.fill((0,0,0,0))
         pygame.draw.circle(surface, self.color, (self.radius, self.radius), self.radius)
         pygame.draw.circle(surface, (30,30,30), (self.radius, self.radius), self.radius - 5)
-        text = SHIP_COUNTER_FONT.render(str(self.ships), True, COLOR_SHIP_COUNTER)
+        text = FONT.render(str(self.ships), True, COLOR_SHIP_COUNTER)
         surface.blit(text, text.get_rect(center = surface.get_rect().center))
         return surface
 
