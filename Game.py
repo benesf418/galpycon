@@ -15,7 +15,7 @@ class Game:
             Planet(300, 300, 30, COLOR_BLUE),
             Planet(200, 100, 50, COLOR_RED),
             Planet(500, 250, 40, COLOR_NEUTRAL),
-            Planet(400, 500, 50, COLOR_NEUTRAL),
+            Planet(400, 500, 50, COLOR_YELLOW),
             Planet(650, 200, 50, COLOR_NEUTRAL)
         ]
         self.ships = []

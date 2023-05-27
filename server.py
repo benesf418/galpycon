@@ -9,21 +9,22 @@ import traceback
 
 pygame.init()
 
-server = NETWORK_HOST
-port = 5555
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+port = NETWORK_PORT
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
-    s.bind((server, port))
+    s.bind((local_ip, port))
 except socket.error as e:
     str(e)
 
 s.listen(2)
-print("Waiting for a connection, Server Started")
+print(f'Server started on {local_ip}:{port}')
 
 playerCount = 0
-playerColors = [COLOR_BLUE, COLOR_RED]
+playerColors = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
 playerShipUpdates = []
 game = Game()
 
@@ -49,7 +50,7 @@ def threaded_client(conn, player):
             # elif data[0] == 'sendUpdate':
             #     game = data[1]
             else:
-                print("Received: ", data)
+                # print("Received: ", data)
                 if data == 'get':
                     gameCopy = Game()
                     gameCopy.planets = game.planets
@@ -59,7 +60,6 @@ def threaded_client(conn, player):
                     playerShipUpdates[player] = []
                 else:
                     #send ships
-                    print("TAK NEVIM PICO")
                     shipCountBefore = game.planets[data[0]].ships
                     game.sendShips(data[0], data[1])
                     for i in range(0, playerCount):
@@ -70,7 +70,7 @@ def threaded_client(conn, player):
                     gameCopy.planets = game.planets
                     res = gameCopy
 
-                print("Sending : ", res)
+                # print("Sending : ", res)
 
             conn.sendall(pickle.dumps(res))
         except Exception as e:
@@ -100,9 +100,19 @@ start_new_thread(loop, ())
 
 while True:
     conn, addr = s.accept()
-    print("Connected to:", addr)
+    try:
+        message = pickle.loads(conn.recv(2048))
+        print(message)
+        if message == 'checking':
+            print('got check message from ', addr)
+        elif message == 'connect':
+            print("Connected to:", addr)
+            start_new_thread(threaded_client, (conn, currentPlayer))
+            playerShipUpdates.append([])
+            currentPlayer += 1
+            playerCount += 1
+    except:
+        print('got invalid message from ', addr)
+        conn.close()
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
-    playerShipUpdates.append([])
-    currentPlayer += 1
-    playerCount += 1
+    

@@ -7,12 +7,14 @@ from pygame import Vector2
 
 class Client():
     def __init__(self):
+        self.network = Network()
+        if not self.network.connected:
+            exit()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("GalPycon")
         self.color: pygame.Color = None
         self.game: Game = None
         self.selectedPlanetIndex: int = -1
-        self.network = Network()
         self.run()
 
     def drawPlanetSelection(self, source: Planet, target: Planet):
@@ -28,7 +30,6 @@ class Client():
             drawable.draw(screen)
         # print(selectedPlanet)
         if self.selectedPlanetIndex != -1:
-            print('selecting xd')
             mousePos = pygame.mouse.get_pos()
             planetIndexMousePos = self.game.getPlanetIndexOnPosition(mousePos)
             if planetIndexMousePos != -1 and planetIndexMousePos != self.selectedPlanetIndex:

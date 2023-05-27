@@ -13,6 +13,7 @@ SHIP_COUNTER_FONT = pygame.font.SysFont('consolas', 25)
 COLOR_BLACK = pygame.Color(0, 0, 0, 255)
 COLOR_RED = pygame.Color(255, 0, 0, 255)
 COLOR_BLUE = pygame.Color(0, 0, 255, 255)
+COLOR_YELLOW = pygame.Color(255, 255, 0, 255)
 COLOR_WHITE = pygame.Color(255, 255, 255, 255)
 
 BACKGROUND_COLOR: pygame.Color = COLOR_BLACK
@@ -21,4 +22,4 @@ COLOR_NEUTRAL: pygame.Color = COLOR_WHITE
 
 SHIP_SIZE: int = 14
 
-NETWORK_HOST = 'localhost'
+NETWORK_PORT = 5555
