@@ -5,10 +5,12 @@ class Button:
     text: str
     position: pygame.Vector2
     size: pygame.Vector2
+    force_gray: bool
 
     def __init__(self, text, position: pygame.Vector2):
         self.text = text
         self.position = position
+        self.force_color: pygame.Color = None
         textWidth, textHeight = FONT.size(self.text)
         self.size = pygame.Vector2(textWidth + 20, textHeight + 20)
 
@@ -20,7 +22,11 @@ class Button:
         return False
 
     def draw(self, screen: pygame.Surface):
+        textWidth, textHeight = FONT.size(self.text)
+        self.size = pygame.Vector2(textWidth + 20, textHeight + 20)
         color = COLOR_WHITE
+        if self.force_color:
+            color = self.force_color
         if self.detect_hover():
             color = COLOR_GRAY
         renderedText = FONT.render(self.text, True, color)
