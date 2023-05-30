@@ -4,20 +4,12 @@ from constants import *
 from Planet import Planet
 
 class Ship:
-    position: Vector2
-    color: pygame.Color
-    targetPlanetIndex: int
-    moveDirection: Vector2
-    arrived: bool
-
     def __init__(self, position: Vector2, color: pygame.Color, targetPlanetIndex: int):
         self.position = position
         self.color = color
         self.targetPlanetIndex = targetPlanetIndex
         self.arrived = False
         self.moveDirection = Vector2(0, 1)
-        
-        
 
     def update(self, planets):
         targetPlanet = planets[self.targetPlanetIndex]

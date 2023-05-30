@@ -4,9 +4,6 @@ import pygame
 from constants import *
 
 class InputBox(Button):
-    active: bool
-    default_text: str
-
     def __init__(self, text, position: pygame.Vector2) -> None:
         super(InputBox, self).__init__(text, position)
         self.active = False

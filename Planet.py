@@ -3,11 +3,6 @@ from pygame import Vector2
 from constants import *
 
 class Planet:
-    position: Vector2
-    radius: int
-    color: pygame.Color
-    ships: int
-
     def __init__(self, x: int, y: int , radius: str, color: pygame.Color, startingShips: int = 0):
         self.position = Vector2(x, y)
         self.color = color

@@ -204,5 +204,3 @@ class App:
     def start_server(self, map_index: int):
         print('hosting game',self.network.player_id)
         self.server = Server(self.network.player_id, map_index)
-
-App()

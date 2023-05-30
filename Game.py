@@ -7,9 +7,6 @@ from Ship import Ship
 import json
 
 class Game:
-    planets: list[Planet]
-    ships: list[Ship]
-
     def __init__(self, map_index = None) -> None:
         pygame.init()
         self.planets: list[Planet] = []

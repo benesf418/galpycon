@@ -2,11 +2,6 @@ import pygame
 from constants import *
 
 class Button:
-    text: str
-    position: pygame.Vector2
-    size: pygame.Vector2
-    force_gray: bool
-
     def __init__(self, text, position: pygame.Vector2):
         self.text = text
         self.position = position

@@ -11,12 +11,6 @@ import random
 
 class Client:
     def __init__(self, screen: pygame.display, network: Network):
-        # self.server_ip = server_ip
-        # self.network = Network()
-        # self.network.connect(self.server_ip)
-        # if not self.network.connected:
-        #     print(f'failed to connect to {server_ip}')
-        #     return
         self.network = network
         self.color = self.network.getColor()
         self.screen = screen
