@@ -6,9 +6,6 @@ import pickle
 from Lobby import Lobby
 import json
 
-import sys
-import traceback
-
 class Server:
     def __init__(self, lobby_leader_id: int, map_index: int) -> None:
         pygame.init()
@@ -29,7 +26,7 @@ class Server:
 
         self.playerCount = 0
         self.playerColors = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
-        self.playerShipUpdates: dict = {}
+        self.player_ship_updates: dict = {}
         self.game = Game(map_index)
 
         self.clock = pygame.time.Clock()
@@ -55,36 +52,30 @@ class Server:
                 self.game.winner_nick = self.lobby.get_player_by_color(self.game.winner_color)['nick']
             self.clock.tick(60)
 
-
     def threaded_client(self, conn, player_id: int):
         player_data = self.lobby.get_player(player_id)
         player_id = player_data['player_id']
         conn.send(pickle.dumps(player_data['color']))
-        reply = ""
         while self.running:
             try:
                 data = pickle.loads(conn.recv(2048))
-                # players[player] = data
 
                 if not data:
                     print("Disconnected")
                     break
-                # elif data[0] == 'sendUpdate':
-                #     game = data[1]
                 else:
-                    # print("Received: ", data)
                     if data == 'get':
                         if self.game_started and not self.game_finished:
-                            gameCopy = Game()
-                            gameCopy.planets = self.game.planets
-                            gameCopy.winner_color = self.game.winner_color
-                            gameCopy.winner_nick = self.game.winner_nick
-                            res = gameCopy
+                            game_copy = Game()
+                            game_copy.planets = self.game.planets
+                            game_copy.winner_color = self.game.winner_color
+                            game_copy.winner_nick = self.game.winner_nick
+                            res = game_copy
                         else:
                             res = self.lobby
                     elif data == 'getShipUpdates':
-                        res = self.playerShipUpdates[str(player_id)]
-                        self.playerShipUpdates[str(player_id)] = []
+                        res = self.player_ship_updates[str(player_id)]
+                        self.player_ship_updates[str(player_id)] = []
                     elif data == 'ready':
                         self.lobby.set_player_ready(player_id, True)
                         res = 'ok'
@@ -98,39 +89,22 @@ class Server:
                         res = 'ok'
                     else:
                         #send ships
-                        shipCountBefore = self.game.planets[data[0]].ships
+                        ship_count_before = self.game.planets[data[0]].ships
                         self.game.sendShips(data[0], data[1])
                         #update for other players
-                        for id in self.playerShipUpdates.keys():
+                        for id in self.player_ship_updates.keys():
                             if id != player_id:
-                                shipsSent = shipCountBefore - self.game.planets[data[0]].ships
-                                self.playerShipUpdates[id].append([data[0], data[1], shipsSent])
-                        gameCopy = Game()
-                        gameCopy.planets = self.game.planets
-                        gameCopy.winner_color = self.game.winner_color
-                        gameCopy.winner_nick = self.game.winner_nick
-                        res = gameCopy
-
-                    # print("Sending : ", res)
+                                shipsSent = ship_count_before - self.game.planets[data[0]].ships
+                                self.player_ship_updates[id].append([data[0], data[1], shipsSent])
+                        game_copy = Game()
+                        game_copy.planets = self.game.planets
+                        game_copy.winner_color = self.game.winner_color
+                        game_copy.winner_nick = self.game.winner_nick
+                        res = game_copy
 
                 conn.sendall(pickle.dumps(res))
 
             except Exception as e:
-                # # Get current system exception
-                # ex_type, ex_value, ex_traceback = sys.exc_info()
-
-                # # Extract unformatter stack traces as tuples
-                # trace_back = traceback.extract_tb(ex_traceback)
-
-                # # Format stacktrace
-                # stack_trace = list()
-
-                # for trace in trace_back:
-                #     stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
-
-                # print("Exception type : %s " % ex_type.__name__)
-                # print("Exception message : %s" %ex_value)
-                # print("Stack trace : %s" %stack_trace)
                 break
 
         print("Lost connection")
@@ -152,29 +126,11 @@ class Server:
                 player_id = message[2]
                 if self.lobby.add_player(player_id, nick):
                     print("Connected to:", addr)
-                    self.playerShipUpdates[str(player_id)] = []
+                    self.player_ship_updates[str(player_id)] = []
                     start_new_thread(self.threaded_client, (conn, player_id))
                 else:
                     conn.send(pickle.dumps('403'))
                     conn.close()
-        # except Exception as e:
-        #     # Get current system exception
-        #     ex_type, ex_value, ex_traceback = sys.exc_info()
-
-        #     # Extract unformatter stack traces as tuples
-        #     trace_back = traceback.extract_tb(ex_traceback)
-
-        #     # Format stacktrace
-        #     stack_trace = list()
-
-        #     for trace in trace_back:
-        #         stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
-
-        #     print("Exception type : %s " % ex_type.__name__)
-        #     print("Exception message : %s" %ex_value)
-        #     print("Stack trace : %s" %stack_trace)
-        #     print(message)
-        #     print('got invalid message from ', addr)
         except:
             conn.close()
     
