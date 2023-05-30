@@ -56,8 +56,8 @@ class Ship:
     
     def draw(self, screen: pygame.Surface):
         surface = pygame.Surface((SHIP_SIZE,SHIP_SIZE))
-        surface.fill((0,0,0))
-        surface.set_colorkey((0, 0, 0))
+        surface.fill(BACKGROUND_COLOR)
+        surface.set_colorkey(BACKGROUND_COLOR)
         pygame.draw.polygon(surface, self.color,((0,1), (SHIP_SIZE, SHIP_SIZE/2), (0, SHIP_SIZE-1)), 2)
         rotatedSurface = pygame.transform.rotate(surface, self.moveDirection.angle_to((1, 0)))
         rect = rotatedSurface.get_rect()

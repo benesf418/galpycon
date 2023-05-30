@@ -4,25 +4,57 @@ from pygame import Vector2
 from constants import *
 from Planet import Planet
 from ship import Ship
+import json
 
 class Game:
     planets: list[Planet]
     ships: list[Ship]
 
-    def __init__(self) -> None:
+    def __init__(self, map_index = None) -> None:
         pygame.init()
-        self.planets = [
-            Planet(300, 300, 30, COLOR_BLUE),
-            Planet(200, 100, 50, COLOR_RED),
-            Planet(500, 250, 40, COLOR_NEUTRAL),
-            Planet(400, 500, 50, COLOR_YELLOW),
-            Planet(650, 200, 50, COLOR_NEUTRAL)
-        ]
+        self.planets: list[Planet] = []
+        if map_index != None:
+            maps_file = open('maps.json')
+            all_maps = json.load(maps_file)
+            map_data = all_maps[map_index]
+            for planet_data in map_data['planets']:
+                color = planet_data[0]
+                if color == -1:
+                    color = COLOR_NEUTRAL
+                else:
+                    color = PLAYER_COLORS[color]
+                x = planet_data[1]
+                y = planet_data[2]
+                radius = planet_data[3]
+                ships = planet_data[4]
+                self.planets.append(Planet(x, y, radius, color, ships))
+        # self.planets = [
+        #     Planet(300, 300, 30, COLOR_BLUE),
+        #     Planet(200, 100, 50, COLOR_RED),
+        #     Planet(500, 250, 40, COLOR_NEUTRAL),
+        #     Planet(400, 500, 50, COLOR_YELLOW),
+        #     Planet(650, 200, 50, COLOR_NEUTRAL)
+        # ]
         self.ships = []
+        self.winner_color: pygame.Color = None
+        self.winner_nick: str = None
+        
 
     def update(self) -> None:
         self.updatePlanets()
         self.updateShips()
+    
+    def detect_winner(self):
+        winner_color = None
+        for planet in self.planets:
+            if winner_color == None:
+                winner_color = planet.color
+            elif winner_color != planet.color and planet.color != COLOR_NEUTRAL:
+                return
+        for ship in self.ships:
+            if ship.color != winner_color:
+                return
+        self.winner_color = winner_color
         
     def get_drawable_objects(self) -> list:
         return self.planets + self.ships

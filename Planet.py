@@ -8,7 +8,7 @@ class Planet:
     color: pygame.Color
     ships: int
 
-    def __init__(self, x: int, y: int , radius: str, color: pygame.Color, startingShips = 0):
+    def __init__(self, x: int, y: int , radius: str, color: pygame.Color, startingShips: int = 0):
         self.position = Vector2(x, y)
         self.color = color
         self.radius = radius
@@ -17,9 +17,10 @@ class Planet:
 
     def generate_surface(self) -> pygame.Surface:
         surface = pygame.Surface((self.radius*2, self.radius*2))
+        surface.set_colorkey(BACKGROUND_COLOR)
         surface.fill((0,0,0,0))
         pygame.draw.circle(surface, self.color, (self.radius, self.radius), self.radius)
-        pygame.draw.circle(surface, (30,30,30), (self.radius, self.radius), self.radius - 5)
+        pygame.draw.circle(surface, PLANET_BACKGROUND, (self.radius, self.radius), self.radius - 5)
         text = FONT.render(str(self.ships), True, COLOR_SHIP_COUNTER)
         surface.blit(text, text.get_rect(center = surface.get_rect().center))
         return surface

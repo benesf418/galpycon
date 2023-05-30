@@ -1,7 +1,5 @@
 import pygame
 from network import Network
-from Game import Game
-from Planet import Planet
 from constants import *
 from pygame import Vector2
 from Client import Client
@@ -11,34 +9,16 @@ from network import Network
 from _thread import *
 from server import Server
 import pygame.locals
-from Lobby import Lobby
+import json
+import random
 
 class App:
-    screen: pygame.display
-    server: Server
-    nick: str
-
-    finding_games: bool
-    found_lobbies: list[Lobby]
-
-    #main menu
-    button_host_game: Button
-    button_join_game: Button
-    input_nickname: InputBox
-    button_exit: Button
-    buttons_main_menu: list[Button]
-
-    #join game menu
-    button_back: Button
-    buttons_join_game_menu: list[Button]
-
-    #found games buttons
-    buttons_found_lobbies: list[Button]
-
-    current_menu_buttons: list[Button]
+    MENU_MAIN = 0
+    MENU_SELECT_MAP = 1
+    MENU_JOIN = 2
 
     def __init__(self):
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.locals.RESIZABLE)
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         if FULLSCREEN:
             pygame.display.toggle_fullscreen()
         pygame.display.set_caption("GalPycon")
@@ -47,27 +27,45 @@ class App:
         self.button_host_game = Button('host game', Vector2(SCREEN_WIDTH/2, 240))
         self.button_join_game = Button('join game', Vector2(SCREEN_WIDTH/2, 300))
         self.input_nickname = InputBox('enter your nickname', Vector2(SCREEN_WIDTH/2, 400))
-        self.button_exit = Button('exit', Vector2(SCREEN_WIDTH/2, 500))
+        self.button_fullscreen = Button('toggle fullscreen', Vector2(SCREEN_WIDTH/2, 460))
+        self.button_exit = Button('exit', Vector2(SCREEN_WIDTH/2, 600))
         self.buttons_main_menu = [
             self.button_host_game,
             self.button_join_game,
             self.input_nickname,
+            self.button_fullscreen,
             self.button_exit
         ]
 
         #join game menu
-        self.button_back = Button('back to main menu', Vector2(SCREEN_WIDTH/2, 500))
+        self.button_back = Button('back to main menu', Vector2(SCREEN_WIDTH/2, 600))
         self.buttons_join_game_menu = [
             self.button_back
         ]
         self.buttons_found_lobbies = []
 
+        #select map menu
+        self.buttons_maps: list[Button] = []
+        self.buttons_select_map_menu = [
+            self.button_back
+        ]
+        maps_file = open('maps.json')
+        self.maps = json.load(maps_file)
+        y = 150
+        for map in self.maps:
+            self.buttons_maps.append(
+                Button(f'{map["name"]} - {map["players"]} players', Vector2(SCREEN_WIDTH/2, y))
+            )
+            y += 60
+        self.buttons_select_map_menu += self.buttons_maps
+
         self.current_menu_buttons = self.buttons_main_menu
+        self.current_menu = self.MENU_MAIN
         self.finding_games = False
         self.found_lobbies = []
         self.server = None
         self.network = None
-        self.nick = None
+        self.default_nick = self.nick = f'player#{random.randint(0, 1000):04d}'
         self.run()
 
     def run_client(self, server_ip: str):
@@ -80,7 +78,7 @@ class App:
     def drawMenu(self):
         self.screen.fill(BACKGROUND_COLOR)
 
-        if self.current_menu_buttons == self.buttons_main_menu:
+        if self.current_menu == self.MENU_MAIN:
             caption = 'GalPycon'
             self.screen.blit(
                 FONT.render(caption, True, COLOR_WHITE),
@@ -94,7 +92,7 @@ class App:
                 (SCREEN_WIDTH/2+FONT.size(caption)[0]/2+10, caption_center_y), (SCREEN_WIDTH - 10, caption_center_y)
             ), 2)
 
-        if self.current_menu_buttons == self.buttons_join_game_menu:
+        if self.current_menu == self.MENU_JOIN:
             caption = 'games on lan:'
             self.screen.blit(
                 FONT.render(caption, True, COLOR_WHITE),
@@ -102,6 +100,13 @@ class App:
             )
             for button in self.buttons_found_lobbies:
                 button.draw(self.screen)
+        
+        if self.current_menu == self.MENU_SELECT_MAP:
+            caption = 'select map:'
+            self.screen.blit(
+                FONT.render(caption, True, COLOR_WHITE),
+                (SCREEN_WIDTH/2 - FONT.size(caption)[0]/2, 50)
+            )
             
         for button in self.current_menu_buttons:
             button.draw(self.screen)
@@ -119,48 +124,62 @@ class App:
                     new_nick = self.input_nickname.handle_input(event)
                     if new_nick:
                         self.nick = new_nick
+                    if self.input_nickname.text == self.input_nickname.default_text:
+                        self.nick = self.default_nick
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for button in self.current_menu_buttons + self.buttons_found_lobbies:
                         if button.detect_hover():
-                            #main menu
                             if button == self.button_join_game:
+                                #open join game menu
                                 self.network = Network(self.nick)
+                                self.current_menu = self.MENU_JOIN
                                 self.current_menu_buttons = self.buttons_join_game_menu
                                 break
                             elif button == self.button_exit:
+                                #quit game
                                 pygame.quit()
                                 exit()
-                            #join game menu
                             elif button == self.button_back:
+                                #back to main menu
+                                self.current_menu = self.MENU_MAIN
                                 self.current_menu_buttons = self.buttons_main_menu
                             elif button in self.buttons_found_lobbies:
+                                #join game
                                 index = self.buttons_found_lobbies.index(button)
                                 lobby = self.found_lobbies[index]
                                 if lobby.players_connected < lobby.players_max:
                                     self.run_client(self.found_lobbies[index].ip_address)
                                     #reset network after disconnecting
+                                    self.current_menu = self.MENU_MAIN
                                     self.current_menu_buttons = self.buttons_main_menu
                                     self.network = None
                                     pygame.event.wait(500)
                                     break
                             elif button == self.button_host_game:
+                                #open select map menu
+                                self.current_menu = self.MENU_SELECT_MAP
+                                self.current_menu_buttons = self.buttons_select_map_menu
+                            elif button in self.buttons_maps:
+                                map_index = self.buttons_maps.index(button)
                                 self.network = Network(self.nick)
                                 pygame.time.wait(50)
-                                self.start_server()
+                                self.start_server(map_index)
                                 pygame.time.wait(100)
                                 self.run_client(self.server.local_ip)
                                 #host disconnected - end server and reset network
                                 self.network.client.close()
                                 self.server.end()
-                                # self.server.socket.close()
                                 self.server = None
+                                self.current_menu = self.MENU_MAIN
                                 self.current_menu_buttons = self.buttons_main_menu
                                 self.network = None
                                 pygame.event.wait(500)
                                 break
                             elif button == self.input_nickname:
                                 button.active = True
+                            elif button == self.button_fullscreen:
+                                pygame.display.toggle_fullscreen()
                             else:
                                 print(button)
 
@@ -179,12 +198,12 @@ class App:
             self.buttons_found_lobbies.append(Button(
                 f'{lobby_leader} ({lobby.players_connected}/{lobby.players_max})', Vector2(SCREEN_WIDTH/2, y)
             ))
-            y += 50
+            y += 60
         print(self.buttons_found_lobbies)
         self.finding_games = False
     
-    def start_server(self):
+    def start_server(self, map_index: int):
         print('hosting game',self.network.player_id)
-        self.server = Server(self.network.player_id)
+        self.server = Server(self.network.player_id, map_index)
 
 App()
