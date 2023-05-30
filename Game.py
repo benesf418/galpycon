@@ -3,7 +3,7 @@ import math
 from pygame import Vector2
 from constants import *
 from Planet import Planet
-from ship import Ship
+from Ship import Ship
 import json
 
 class Game:

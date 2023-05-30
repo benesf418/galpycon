@@ -1,13 +1,12 @@
 import pygame
-from network import Network
 from constants import *
 from pygame import Vector2
 from Client import Client
 from Button import Button
 from InputBox import InputBox
-from network import Network
+from Network import Network
 from _thread import *
-from server import Server
+from Server import Server
 import pygame.locals
 import json
 import random

@@ -1,5 +1,5 @@
 import pygame
-from network import Network
+from Network import Network
 from Game import Game
 from Planet import Planet
 from constants import *
