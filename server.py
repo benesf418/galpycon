@@ -4,12 +4,13 @@ from Game import Game
 from constants import *
 import pickle
 from Lobby import Lobby
+import json
 
 import sys
 import traceback
 
 class Server:
-    def __init__(self, lobby_leader_id: int) -> None:
+    def __init__(self, lobby_leader_id: int, map_index: int) -> None:
         pygame.init()
 
         self.hostname = socket.gethostname()
@@ -29,13 +30,16 @@ class Server:
         self.playerCount = 0
         self.playerColors = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
         self.playerShipUpdates: dict = {}
-        self.game = Game()
+        self.game = Game(map_index)
 
         self.clock = pygame.time.Clock()
         self.currentPlayer = 0
         self.running = False
         self.game_started = False
-        self.lobby = Lobby(self.local_ip, lobby_leader_id)
+        self.game_finished = False
+        map = json.load(open('maps.json'))[map_index]
+        max_players: int = map['players']
+        self.lobby = Lobby(self.local_ip, lobby_leader_id, max_players)
         start_new_thread(self.run, ())
     
     def run(self):
@@ -43,9 +47,12 @@ class Server:
         while self.running:
             self.accept_connections()
 
-    def loop(self):
+    def game_loop(self):
         while self.running:
             self.game.update()
+            self.game.detect_winner()
+            if self.game.winner_color != None:
+                self.game.winner_nick = self.lobby.get_player_by_color(self.game.winner_color)['nick']
             self.clock.tick(60)
 
 
@@ -67,9 +74,11 @@ class Server:
                 else:
                     # print("Received: ", data)
                     if data == 'get':
-                        if self.game_started:
+                        if self.game_started and not self.game_finished:
                             gameCopy = Game()
                             gameCopy.planets = self.game.planets
+                            gameCopy.winner_color = self.game.winner_color
+                            gameCopy.winner_nick = self.game.winner_nick
                             res = gameCopy
                         else:
                             res = self.lobby
@@ -83,7 +92,7 @@ class Server:
                         self.lobby.set_player_ready(player_id, False)
                         res = 'ok'
                     elif data == 'start':
-                        start_new_thread(self.loop, ())
+                        start_new_thread(self.game_loop, ())
                         self.game_started = True
                         self.lobby.open = False
                         res = 'ok'
@@ -98,6 +107,8 @@ class Server:
                                 self.playerShipUpdates[id].append([data[0], data[1], shipsSent])
                         gameCopy = Game()
                         gameCopy.planets = self.game.planets
+                        gameCopy.winner_color = self.game.winner_color
+                        gameCopy.winner_nick = self.game.winner_nick
                         res = gameCopy
 
                     # print("Sending : ", res)
@@ -123,7 +134,8 @@ class Server:
                 break
 
         print("Lost connection")
-        self.lobby.remove_player(player_data['player_id'])
+        if not self.game_started:
+            self.lobby.remove_player(player_data['player_id'])
         conn.close()
 
     def accept_connections(self):

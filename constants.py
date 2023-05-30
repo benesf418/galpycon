@@ -1,13 +1,13 @@
 import pygame
 pygame.init()
 
-SCREEN_WIDTH: int = 800
-SCREEN_HEIGHT: int = 600
+SCREEN_WIDTH: int = 1280
+SCREEN_HEIGHT: int = 720
 FULLSCREEN = False
 
 GAME_SPEED: float = 1
 PLANET_PRODUCTION_SPEED: float = 1
-SHIP_SPEED: float = 0.5
+SHIP_SPEED: float = 1
 
 FONT = pygame.font.SysFont('consolas', 25)
 
@@ -22,6 +22,12 @@ COLOR_GRAY = pygame.Color(180, 180, 180, 255)
 BACKGROUND_COLOR: pygame.Color = COLOR_BLACK
 COLOR_SHIP_COUNTER: pygame.Color = COLOR_WHITE
 COLOR_NEUTRAL: pygame.Color = COLOR_WHITE
+PLANET_BACKGROUND = pygame.Color(30, 30, 30, 255)
+PLAYER_COLORS = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
+
+STAR_COUNT = 300
+STAR_SIZE_MIN = 8
+STAR_SIZE_MAX = 13
 
 SHIP_SIZE: int = 14
 

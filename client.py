@@ -7,6 +7,7 @@ from pygame import Vector2
 from Lobby import Lobby
 from Button import Button
 from math import floor
+import random
 
 class Client:
     def __init__(self, screen: pygame.display, network: Network):
@@ -21,12 +22,27 @@ class Client:
         self.screen = screen
         self.game: Game = None
         self.selectedPlanetIndex: int = -1
-        self.button_back = Button('back to main menu', Vector2(SCREEN_WIDTH/2, 500))
+        self.button_back = Button('back to main menu', Vector2(SCREEN_WIDTH/2, 600))
+        self.button_back_game = Button('back to main menu', Vector2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 100))
         self.button_ready = Button('ready', Vector2(SCREEN_WIDTH/2, 410))
         self.ready = False
         self.running = True
         self.count_down_length: float = 5.5
         self.count_down: float = self.count_down_length
+        self.star_positions: list[Vector2] = []
+        self.star_sizes: list[int] = []
+        for i in range(STAR_COUNT):
+            self.star_positions.append(Vector2(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)))
+            self.star_sizes.append(random.randint(STAR_SIZE_MIN, STAR_SIZE_MAX))
+        self.stars_surface: pygame.Surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.stars_surface.fill(BACKGROUND_COLOR)
+        for i in range(len(self.star_positions)):
+            star_position = self.star_positions[i]
+            star_size = self.star_sizes[i]
+            self.stars_surface.blit(
+                pygame.font.SysFont('consolas', star_size).render('x', True, (50 + star_size*10, 50 + star_size*10, 50 + star_size*10, 255) ),
+                star_position
+            )
         self.run()
 
 
@@ -40,6 +56,7 @@ class Client:
 
     def redrawWindow(self):
         self.screen.fill(BACKGROUND_COLOR)
+        self.screen.blit(self.stars_surface, (0, 0))
         for drawable in self.game.get_drawable_objects():
             drawable.draw(self.screen)
         # print(selectedPlanet)
@@ -48,6 +65,27 @@ class Client:
             planetIndexMousePos = self.game.getPlanetIndexOnPosition(mousePos)
             if planetIndexMousePos != -1 and planetIndexMousePos != self.selectedPlanetIndex:
                 self.drawPlanetSelection(self.game.planets[self.selectedPlanetIndex], self.game.planets[planetIndexMousePos])
+        
+        if self.game.winner_color != None:
+            winner_text = 'winner: '
+            winner_text_full = winner_text + self.game.winner_nick
+            winner_text_size = FONT.size(winner_text_full)
+            winner_text_background = pygame.Surface((winner_text_size[0] + 20, winner_text_size[1] + 20))
+            winner_text_background.set_alpha(200)
+            winner_text_background.fill(BACKGROUND_COLOR)
+            self.screen.blit(winner_text_background, (SCREEN_WIDTH/2 - winner_text_size[0]/2 - 10, SCREEN_HEIGHT/2 - winner_text_size[1]/2 - 10))
+            # pygame.draw.rect(self.screen, (0, 0, 0, 120), 
+            #     (SCREEN_WIDTH/2 - winner_text_size[0]/2 - 10, SCREEN_HEIGHT/2 - winner_text_size[1]/2 - 10, winner_text_size[0] + 20, winner_text_size[1] + 20)
+            # )
+            self.screen.blit(
+                FONT.render(winner_text, True, COLOR_WHITE),
+                (SCREEN_WIDTH/2 - winner_text_size[0]/2, SCREEN_HEIGHT/2 - winner_text_size[1]/2)
+            )
+            self.screen.blit(
+                FONT.render(self.game.winner_nick, True, self.game.winner_color),
+                (SCREEN_WIDTH/2 - winner_text_size[0]/2 + FONT.size(winner_text)[0], SCREEN_HEIGHT/2  - winner_text_size[1]/2)
+            )
+            self.button_back_game.draw(self.screen)
         pygame.display.update()
     
 
@@ -172,6 +210,8 @@ class Client:
             #update moving ships locally
             self.game.updateShips()
             self.game.planets = update.planets
+            self.game.winner_color = update.winner_color
+            self.game.winner_nick = update.winner_nick
 
             #send ships that other players have sent locally
             shipUpdates = self.network.send('getShipUpdates')
@@ -190,9 +230,13 @@ class Client:
                         return
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    planetIndexOnMousePos = self.game.getPlanetIndexOnPosition(pygame.mouse.get_pos())
-                    if planetIndexOnMousePos != -1 and self.game.planets[planetIndexOnMousePos].color == self.color:
-                        self.selectedPlanetIndex = planetIndexOnMousePos
+                    if self.game.winner_color == None:
+                        planetIndexOnMousePos = self.game.getPlanetIndexOnPosition(pygame.mouse.get_pos())
+                        if planetIndexOnMousePos != -1 and self.game.planets[planetIndexOnMousePos].color == self.color:
+                            self.selectedPlanetIndex = planetIndexOnMousePos
+                    elif self.button_back_game.detect_hover():
+                        self.end()
+                        return
                 
                 #deselecting planets and sending ships
                 if event.type == pygame.MOUSEBUTTONUP:

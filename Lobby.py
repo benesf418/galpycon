@@ -1,18 +1,11 @@
 from constants import *
 
 class Lobby:
-    ip_address: str
-    players_max: int
-    players_connected: int
-    player_list: list
-    available_colors: list
-    open: bool
-
-    def __init__(self, ip_address: str, lobby_leader_id: int) -> None:
-        self.players_max = 3
+    def __init__(self, ip_address: str, lobby_leader_id: int, max_players: int) -> None:
+        self.players_max = max_players
         self.players_connected = 0
         self.player_list = []
-        self.available_colors = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
+        self.available_colors = PLAYER_COLORS[0:max_players]
         self.lobby_leader_id = lobby_leader_id
         self.ip_address = ip_address
         self.open = True
@@ -46,4 +39,9 @@ class Lobby:
             if self.player_list[i]['player_id'] == player_id:
                 return self.player_list[i]
         return None
-        
+    
+    def get_player_by_color(self, color) -> int|None:
+        for player in self.player_list:
+            if player['color'] == color:
+                return player
+        return None
