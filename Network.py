@@ -8,7 +8,7 @@ from Lobby import Lobby
 class Network:
     def __init__(self, nickname: str = None):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.settimeout(0.01)
+        self.client.settimeout(0.300)
         self.nickname = f'player#{random.randint(0, 1000):04d}'
         if nickname:
             self.nickname = nickname
@@ -16,21 +16,6 @@ class Network:
         print (self.nickname)
         self.color = None
         self.connected = False
-        # hostname = socket.gethostname()
-        # local_ip = socket.gethostbyname(hostname)
-        # network = '.'.join(local_ip.split('.')[0:3])
-        # for i in range(1, 255):
-        #     serverFound = self.check(f'{network}.{i}', NETWORK_PORT)
-        #     if serverFound:
-        #         print('server found')
-        #         self.server = f'{network}.{i}'
-        #         self.port = NETWORK_PORT
-        #         self.addr = (self.server, self.port)
-        #         self.color = self.connect()
-        #         self.connected = True
-        #         break
-        # if not self.connected:
-        #     print('didnt find any server on lan')
 
     def getColor(self):
         return self.color
