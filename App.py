@@ -74,7 +74,7 @@ class App:
             return
         Client(self.screen, self.network)
 
-    def drawMenu(self):
+    def draw_menu(self):
         self.screen.fill(BACKGROUND_COLOR)
 
         if self.current_menu == self.MENU_MAIN:
@@ -182,10 +182,10 @@ class App:
                             else:
                                 print(button)
 
-            if self.current_menu_buttons == self.buttons_join_game_menu and not self.finding_games:
+            if self.current_menu == self.MENU_JOIN and not self.finding_games:
                 start_new_thread(self.find_lobbies, ())
             
-            self.drawMenu()
+            self.draw_menu()
     
     def find_lobbies(self):
         self.finding_games = True

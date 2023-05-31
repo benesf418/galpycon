@@ -6,8 +6,8 @@ class Button:
         self.text = text
         self.position = position
         self.force_color: pygame.Color = None
-        textWidth, textHeight = FONT.size(self.text)
-        self.size = pygame.Vector2(textWidth + 20, textHeight + 20)
+        text_width, text_height = FONT.size(self.text)
+        self.size = pygame.Vector2(text_width + 20, text_height + 20)
 
     def detect_hover(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -17,8 +17,8 @@ class Button:
         return False
 
     def draw(self, screen: pygame.Surface):
-        textWidth, textHeight = FONT.size(self.text)
-        self.size = pygame.Vector2(textWidth + 20, textHeight + 20)
+        text_width, text_height = FONT.size(self.text)
+        self.size = pygame.Vector2(text_width + 20, text_height + 20)
         color = COLOR_WHITE
         if self.force_color:
             color = self.force_color

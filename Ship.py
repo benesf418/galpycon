@@ -4,33 +4,33 @@ from constants import *
 from Planet import Planet
 
 class Ship:
-    def __init__(self, position: Vector2, color: pygame.Color, targetPlanetIndex: int):
+    def __init__(self, position: Vector2, color: pygame.Color, target_planet_index: int):
         self.position = position
         self.color = color
-        self.targetPlanetIndex = targetPlanetIndex
+        self.target_planet_index = target_planet_index
         self.arrived = False
-        self.moveDirection = Vector2(0, 1)
+        self.move_direction = Vector2(0, 1)
 
     def update(self, planets):
-        targetPlanet = planets[self.targetPlanetIndex]
-        self.moveDirection = (targetPlanet.position - self.position).normalize()
-        newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
+        target_planet = planets[self.target_planet_index]
+        self.move_direction = (target_planet.position - self.position).normalize()
+        new_position = self.position + self.move_direction * SHIP_SPEED * GAME_SPEED
         for planet in planets:
-            if planet == targetPlanet:
-                if planet.isInRadius(newPosition):
+            if planet == target_planet:
+                if planet.isInRadius(new_position):
                     self.arrived = True
-                    if targetPlanet.color != self.color:
-                        targetPlanet.ships -= 1
-                        if targetPlanet.ships == 0:
-                            targetPlanet.color = self.color
-                        elif targetPlanet.ships == -1:
-                            targetPlanet.color = self.color
-                            targetPlanet.ships = 1
+                    if target_planet.color != self.color:
+                        target_planet.ships -= 1
+                        if target_planet.ships == 0:
+                            target_planet.color = self.color
+                        elif target_planet.ships == -1:
+                            target_planet.color = self.color
+                            target_planet.ships = 1
                     else:
-                        targetPlanet.ships += 1
-                    targetPlanet.generate_surface()
-            elif planet.isInRadius(newPosition, 9):
-                angleToObstacle = self.moveDirection.angle_to(planet.position - self.position)
+                        target_planet.ships += 1
+                    target_planet.generate_surface()
+            elif planet.isInRadius(new_position, 9):
+                angleToObstacle = self.move_direction.angle_to(planet.position - self.position)
                 if (angleToObstacle > 180):
                     angleToObstacle -= 360
                 elif angleToObstacle < - 180:
@@ -38,11 +38,11 @@ class Ship:
                 if abs(angleToObstacle) < 89:
                     angleToRotate = 90 - abs(angleToObstacle)
                     if angleToObstacle <= 0:
-                        self.moveDirection = self.moveDirection.rotate(angleToRotate)
+                        self.move_direction = self.move_direction.rotate(angleToRotate)
                     else:
-                        self.moveDirection = self.moveDirection.rotate(-angleToRotate)
-                    newPosition = self.position + self.moveDirection * SHIP_SPEED * GAME_SPEED
-        self.position = newPosition
+                        self.move_direction = self.move_direction.rotate(-angleToRotate)
+                    new_position = self.position + self.move_direction * SHIP_SPEED * GAME_SPEED
+        self.position = new_position
             
 
     
@@ -51,6 +51,6 @@ class Ship:
         surface.fill(BACKGROUND_COLOR)
         surface.set_colorkey(BACKGROUND_COLOR)
         pygame.draw.polygon(surface, self.color,((0,1), (SHIP_SIZE, SHIP_SIZE/2), (0, SHIP_SIZE-1)), 2)
-        rotatedSurface = pygame.transform.rotate(surface, self.moveDirection.angle_to((1, 0)))
-        rect = rotatedSurface.get_rect()
-        screen.blit(rotatedSurface, (self.position.x - rect.width/2, self.position.y - rect.height/2))
+        rotated_surface = pygame.transform.rotate(surface, self.move_direction.angle_to((1, 0)))
+        rect = rotated_surface.get_rect()
+        screen.blit(rotated_surface, (self.position.x - rect.width/2, self.position.y - rect.height/2))

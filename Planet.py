@@ -3,12 +3,12 @@ from pygame import Vector2
 from constants import *
 
 class Planet:
-    def __init__(self, x: int, y: int , radius: str, color: pygame.Color, startingShips: int = 0):
+    def __init__(self, x: int, y: int , radius: str, color: pygame.Color, starting_ships: int = 0):
         self.position = Vector2(x, y)
         self.color = color
         self.radius = radius
-        self.frameCounter = 0
-        self.ships = startingShips
+        self.frame_counter = 0
+        self.ships = starting_ships
 
     def generate_surface(self) -> pygame.Surface:
         surface = pygame.Surface((self.radius*2, self.radius*2))
@@ -23,9 +23,9 @@ class Planet:
     def update(self):
         if self.color == COLOR_NEUTRAL:
             return
-        self.frameCounter += self.radius * PLANET_PRODUCTION_SPEED * GAME_SPEED
-        if self.frameCounter >= 2500:
-            self.frameCounter -= 2500
+        self.frame_counter += self.radius * PLANET_PRODUCTION_SPEED * GAME_SPEED
+        if self.frame_counter >= 2500:
+            self.frame_counter -= 2500
             self.ships += 1
             self.generate_surface()
 
@@ -33,6 +33,6 @@ class Planet:
     def draw(self, screen: pygame.Surface):
         screen.blit(self.generate_surface(), (self.position.x - self.radius, self.position.y - self.radius))
     
-    def isInRadius(self, pos: Vector2, extendRadius: float = 0) -> bool:
+    def isInRadius(self, pos: Vector2, extend_radius: float = 0) -> bool:
         distance = (pos - self.position).length()
-        return distance <= self.radius + extendRadius
+        return distance <= self.radius + extend_radius

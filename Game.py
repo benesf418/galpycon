@@ -38,8 +38,8 @@ class Game:
         
 
     def update(self) -> None:
-        self.updatePlanets()
-        self.updateShips()
+        self.update_planets()
+        self.update_ships()
     
     def detect_winner(self):
         winner_color = None
@@ -56,44 +56,44 @@ class Game:
     def get_drawable_objects(self) -> list:
         return self.planets + self.ships
     
-    def sendShips(self, sourcePlanetIndex: int, targetPlanetIndex: int, amount: int = None):
-        source = self.planets[sourcePlanetIndex]
-        target = self.planets[targetPlanetIndex]
+    def send_ships(self, source_planet_index: int, target_planet_index: int, amount: int = None):
+        source = self.planets[source_planet_index]
+        target = self.planets[target_planet_index]
         if amount is not None:
-            shipCount = amount
+            ship_count = amount
         else:
-            shipCount = round(source.ships/2)
-            if shipCount > source.ships:
-                shipCount -= 1
-            source.ships -= shipCount
+            ship_count = round(source.ships/2)
+            if ship_count > source.ships:
+                ship_count -= 1
+            source.ships -= ship_count
         source.generate_surface()
-        planetPos = source.position
-        direction:Vector2 = (target.position - planetPos).normalize()
+        planet_pos = source.position
+        direction:Vector2 = (target.position - planet_pos).normalize()
         distance = source.radius
-        degreeStep = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
-        direction = direction.rotate(-degreeStep*shipCount/2)
-        degreeCounter = 0
-        for i in range(0, shipCount):
-            pos = planetPos + direction * distance
-            direction = direction.rotate(degreeStep)
-            degreeCounter += degreeStep
-            if degreeCounter >= 360:
-                degreeCounter = 0
+        degree_step = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
+        direction = direction.rotate(-degree_step*ship_count/2)
+        degree_counter = 0
+        for i in range(0, ship_count):
+            pos = planet_pos + direction * distance
+            direction = direction.rotate(degree_step)
+            degree_counter += degree_step
+            if degree_counter >= 360:
+                degree_counter = 0
                 distance += SHIP_SIZE
-                degreeStep = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
-            self.ships.append(Ship(pos, source.color, targetPlanetIndex))
+                degree_step = 360/(2*3.14*(distance/(SHIP_SIZE+4)))
+            self.ships.append(Ship(pos, source.color, target_planet_index))
     
-    def getPlanetIndexOnPosition(self, position: Vector2) -> int:
+    def get_planet_index_on_position(self, position: Vector2) -> int:
         for i in range(len(self.planets)):
             if self.planets[i].isInRadius(position):
                 return i
         return -1
     
-    def updatePlanets(self):
+    def update_planets(self):
         for planet in self.planets:
             planet.update()
     
-    def updateShips(self):
+    def update_ships(self):
         for ship in self.ships:
             ship.update(self.planets)
             if ship.arrived:

@@ -56,7 +56,7 @@ class Client:
         # print(selectedPlanet)
         if self.selectedPlanetIndex != -1:
             mousePos = pygame.mouse.get_pos()
-            planetIndexMousePos = self.game.getPlanetIndexOnPosition(mousePos)
+            planetIndexMousePos = self.game.get_planet_index_on_position(mousePos)
             if planetIndexMousePos != -1 and planetIndexMousePos != self.selectedPlanetIndex:
                 self.drawPlanetSelection(self.game.planets[self.selectedPlanetIndex], self.game.planets[planetIndexMousePos])
         
@@ -153,14 +153,6 @@ class Client:
                         pygame.quit()
                         self.end()
                         return
-                    
-                    # if event.type == pygame.KEYDOWN:
-                    #     if event.key == pygame.K_SPACE:
-                    #         # print('trying to start')
-                    #         self.network.send('start')
-                    #         if update.get_player(self.network.player_id) == update.lobby_leader_id:
-                    #             self.network.send('start')
-
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         #back to menu button
                         if self.button_back.detect_hover():
@@ -202,7 +194,7 @@ class Client:
                 self.game = update
 
             #update moving ships locally
-            self.game.updateShips()
+            self.game.update_ships()
             self.game.planets = update.planets
             self.game.winner_color = update.winner_color
             self.game.winner_nick = update.winner_nick
@@ -211,7 +203,7 @@ class Client:
             shipUpdates = self.network.send('getShipUpdates')
             if shipUpdates:
                 for shipUpdate in shipUpdates:
-                    self.game.sendShips(shipUpdate[0], shipUpdate[1], shipUpdate[2])
+                    self.game.send_ships(shipUpdate[0], shipUpdate[1], shipUpdate[2])
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -225,7 +217,7 @@ class Client:
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.game.winner_color == None:
-                        planetIndexOnMousePos = self.game.getPlanetIndexOnPosition(pygame.mouse.get_pos())
+                        planetIndexOnMousePos = self.game.get_planet_index_on_position(pygame.mouse.get_pos())
                         if planetIndexOnMousePos != -1 and self.game.planets[planetIndexOnMousePos].color == self.color:
                             self.selectedPlanetIndex = planetIndexOnMousePos
                     elif self.button_back_game.detect_hover():
@@ -235,10 +227,10 @@ class Client:
                 #deselecting planets and sending ships
                 if event.type == pygame.MOUSEBUTTONUP:
                     if self.selectedPlanetIndex != -1:
-                        planetIndexOnMousePos = self.game.getPlanetIndexOnPosition(pygame.mouse.get_pos())
+                        planetIndexOnMousePos = self.game.get_planet_index_on_position(pygame.mouse.get_pos())
                         if planetIndexOnMousePos != -1 and planetIndexOnMousePos != self.selectedPlanetIndex:
                             self.network.send([self.selectedPlanetIndex, planetIndexOnMousePos])
-                            self.game.sendShips(self.selectedPlanetIndex, planetIndexOnMousePos)
+                            self.game.send_ships(self.selectedPlanetIndex, planetIndexOnMousePos)
                     self.selectedPlanetIndex = -1
             
             self.redrawWindow()

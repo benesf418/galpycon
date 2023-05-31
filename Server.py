@@ -24,13 +24,10 @@ class Server:
         self.socket.listen(2)
         print(f'Server started on {self.local_ip}:{self.port}')
 
-        self.playerCount = 0
-        self.playerColors = [COLOR_BLUE, COLOR_RED, COLOR_YELLOW]
         self.player_ship_updates: dict = {}
         self.game = Game(map_index)
 
         self.clock = pygame.time.Clock()
-        self.currentPlayer = 0
         self.running = False
         self.game_started = False
         self.game_finished = False
@@ -90,7 +87,7 @@ class Server:
                     else:
                         #send ships
                         ship_count_before = self.game.planets[data[0]].ships
-                        self.game.sendShips(data[0], data[1])
+                        self.game.send_ships(data[0], data[1])
                         #update for other players
                         for id in self.player_ship_updates.keys():
                             if id != player_id:
